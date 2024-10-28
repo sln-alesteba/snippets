@@ -1,0 +1,78 @@
+\newcommand{\drawBlocks}[6]{% 
+    % #1 = number of blocks, 
+    % #2 = y position, 
+    % #3 = block content, 
+    % #4 = total width,
+    % #5 = x start coordinate,
+    % #6 = comma-separated indices - nodes to change color
+    \pgfmathsetmacro{\blockwidth}{1.0} % Width of each block
+    
+    % Offset values - dashed rectangle
+    \pgfmathsetmacro{\offset}{0.1} % Adjust offset as needed
+    \pgfmathsetmacro{\rectwidth}{#4 + 2 * \offset} % Width dashed rectangle
+    \pgfmathsetmacro{\rectheight}{1 + 2 * \offset} % Height rectangle
+    
+    % Draw dashed rectangle
+    \draw[dashed] ({#5 - \offset}, {#2 - \offset}) rectangle ({#5 + \rectwidth}, {#2 + \rectheight}); 
+
+    % Calculate spacing remaining width
+    \pgfmathsetmacro{\remainingWidth}{#4 - (#1 * \blockwidth)} % Remaining width
+    \pgfmathsetmacro{\spacing}{ifthenelse(#1 > 1, \remainingWidth / (#1 - 1), 0)} % Calculate spacing between blocks
+
+    % Draw the blocks
+    \pgfmathparse{int(#1 - 1)}
+    \foreach \i in {0, ..., \pgfmathresult} {
+        
+        \pgfmathparse{int(\i == #1 - 2)}
+
+        \pgfmathsetmacro{\positionX}{#5 + \i * (\blockwidth + \spacing)}
+        \pgfmathsetmacro{\positionY}{#2} 
+
+        \pgfmathsetmacro{\checkedvar}{0} 
+    
+        % Check if index is in the given indices
+        \foreach \j in {#6} {
+        
+            \ifnum \i = \j
+
+                \definecolor{mycustomcolor}{RGB}{15, 155, 100};
+
+                \tikzset{%
+                    block/.style    = {draw, thick, rectangle, 
+                    minimum height=3.0em, 
+                    minimum width=2.5em, 
+                    anchor=south west,
+                    fill=mycustomcolor}
+                }
+
+                \ifnum \pgfmathresult = 1  
+                    \draw node [block] at (\positionX, \positionY) {...};
+                \else
+                    \draw node [block] at (\positionX, \positionY) {$#3_\i$};
+                \fi
+
+                \pgfmathsetmacro{\checked}{1}
+        
+             \fi
+        }
+
+        \ifnum\checkedvar = 0
+
+            \tikzset{%
+                        block/.style    = {draw, rectangle, 
+                        minimum height=3.0em, 
+                        minimum width=2.5em, 
+                        anchor=south west
+                        }
+                }
+
+            \ifnum \pgfmathresult = 1
+                \draw node [block] at (\positionX, \positionY) {...};
+            \else
+                \draw node [block] at (\positionX, \positionY) {$#3_\i$};
+            \fi
+
+        \fi
+
+    }
+}
